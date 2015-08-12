@@ -50,7 +50,7 @@ void setup()
 	Serial.begin(speed);
 	pinMode(pin, INPUT_PULLUP);
 	attachInterrupt(interrupt, pulse, FALLING);
-	size = EEPROM.read(0);
+	EEPROM.get(0, size);
 	load();
 }
 
@@ -80,6 +80,6 @@ void serialEvent()
 {
 	size = Serial.parseInt();
 	Serial.readStringUntil('\n');
-	EEPROM.update(0, constrain(size, 1, 60));
+	EEPROM.put(0, size);
 	load();
 }
