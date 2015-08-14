@@ -25,18 +25,7 @@ unsigned long buffer[60];
 volatile unsigned long count;
 unsigned long total;
 unsigned long cpm;
-
-static void load()
-{
-	index = 0;
-	memset(buffer, 0, sizeof(buffer)); // garder les anciennes valeurs ?
-	size = constrain(size, 1, 60);
-	max = ULONG_MAX / size;
-	if (count > max)
-		count = max;
-	total = 0;
-	cpm = 0;
-}
+float ratio;
 
 static void pulse()
 {
@@ -45,13 +34,53 @@ static void pulse()
 		count++;
 }
 
+static void compute()
+{
+	if (total < ULONG_MAX / ratio)
+		cpm = total * ratio;
+	else
+		cpm = max;
+}
+
+static void resize(int n)
+{
+	n = constrain(n, 1, 60);
+	if (n < size)
+	{
+		if (n <= index)
+		{
+			size = index;
+			index = 0;
+		}
+		for (int i = index; i < n; i++)
+			buffer[i] = buffer[i + size - n];
+		total = 0;
+		for (int i = 0; i < n; i++)
+			total += buffer[i];
+	}
+	else
+	{
+		for (int i = n; i > index;)
+			buffer[--i] = --size < index ? 0 : buffer[size];
+	}
+	size = n;
+	ratio = 60. / size;
+	max = ULONG_MAX / size;
+	if (count > max)
+		count = max;
+	compute();
+}
+
 void setup()
 {
+	int n;
+
+	timer = millis();
 	Serial.begin(speed);
 	pinMode(pin, INPUT_PULLUP);
 	attachInterrupt(interrupt, pulse, FALLING);
-	EEPROM.get(0, size);
-	load();
+	EEPROM.get(0, n);
+	resize(n);
 }
 
 void loop()
@@ -62,15 +91,12 @@ void loop()
 	{
 		total -= buffer[index];
 		buffer[index] = count;
-		count -= buffer[index];
 		total += buffer[index];
-		if (total < ULONG_MAX / 60)
-			cpm = (total * 60) / size;
-		else
-			cpm = max;
+		count -= buffer[index];
 		if (++index >= size)
 			index = 0;
 		timer = now;
+		compute();
 	}
 	Serial.println(cpm);
 	delay(1);
@@ -78,8 +104,9 @@ void loop()
 
 void serialEvent()
 {
-	size = Serial.parseInt();
+	int n = Serial.parseInt();
+
 	Serial.readStringUntil('\n');
-	EEPROM.put(0, size);
-	load();
+	EEPROM.put(0, n);
+	resize(n);
 }
