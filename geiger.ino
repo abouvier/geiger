@@ -6,7 +6,7 @@
 /*   By: abouvier <abouvier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/08/04 23:30:42 by abouvier          #+#    #+#             */
-/*   Updated: 2015/08/12 13:32:23 by abouvier         ###   ########.fr       */
+/*   Updated: 2015/08/14 03:22:17 by abouvier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ static void load()
 
 static void pulse()
 {
-	//while (digitalRead(pin) == LOW);
+	//while (digitalRead(pin) == LOW); // risque de boucle infinie ?
 	if (count < max)
 		count++;
 }
