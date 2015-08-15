@@ -6,7 +6,7 @@
 /*   By: abouvier <abouvier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/08/04 23:30:42 by abouvier          #+#    #+#             */
-/*   Updated: 2015/08/14 03:22:17 by abouvier         ###   ########.fr       */
+/*   Updated: 2015/08/15 05:59:03 by abouvier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,12 @@ const int pin = 2;
 const int interrupt = 0;
 const int speed = 9600;
 
-int size;
-int index;
+byte size;
+byte index;
+word buffer[60];
 unsigned long max;
 unsigned long timer;
-unsigned long buffer[60];
-volatile unsigned long count;
+volatile word count;
 unsigned long total;
 unsigned long cpm;
 float ratio;
@@ -42,7 +42,7 @@ static void compute()
 		cpm = max;
 }
 
-static void resize(int n)
+static void resize(byte n)
 {
 	n = constrain(n, 1, 60);
 	if (n < size)
@@ -73,14 +73,11 @@ static void resize(int n)
 
 void setup()
 {
-	int n;
-
-	timer = millis();
 	Serial.begin(speed);
 	pinMode(pin, INPUT_PULLUP);
 	attachInterrupt(interrupt, pulse, FALLING);
-	EEPROM.get(0, n);
-	resize(n);
+	resize(EEPROM.read(0));
+	timer = millis();
 }
 
 void loop()
@@ -104,9 +101,9 @@ void loop()
 
 void serialEvent()
 {
-	int n = Serial.parseInt();
+	byte n = Serial.parseInt();
 
 	Serial.readStringUntil('\n');
-	EEPROM.put(0, n);
+	EEPROM.update(0, n);
 	resize(n);
 }
