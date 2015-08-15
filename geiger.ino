@@ -6,104 +6,60 @@
 /*   By: abouvier <abouvier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/08/04 23:30:42 by abouvier          #+#    #+#             */
-/*   Updated: 2015/08/15 05:59:03 by abouvier         ###   ########.fr       */
+/*   Updated: 2015/08/16 00:45:56 by abouvier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <EEPROM.h>
-#include <limits.h>
+#include <Timer.h>
+#include <CircularBuffer.h>
+#include <MovingAverage.h>
+#include <limits.h> // UINT_MAX = (word)-1
 
 const int pin = 2;
 const int interrupt = 0;
 const int speed = 9600;
 
-byte size;
-byte index;
-word buffer[60];
-unsigned long max;
-unsigned long timer;
+const int size = 10;
+
+Timer timer;
 volatile word count;
-unsigned long total;
+MovingAverage<word, size> buffer;
+MovingAverage<unsigned long, 4> history;
 unsigned long cpm;
-float ratio;
-
-static void pulse()
-{
-	//while (digitalRead(pin) == LOW); // risque de boucle infinie ?
-	if (count < max)
-		count++;
-}
-
-static void compute()
-{
-	if (total < ULONG_MAX / ratio)
-		cpm = total * ratio;
-	else
-		cpm = max;
-}
-
-static void resize(byte n)
-{
-	n = constrain(n, 1, 60);
-	if (n < size)
-	{
-		if (n <= index)
-		{
-			size = index;
-			index = 0;
-		}
-		for (int i = index; i < n; i++)
-			buffer[i] = buffer[i + size - n];
-		total = 0;
-		for (int i = 0; i < n; i++)
-			total += buffer[i];
-	}
-	else
-	{
-		for (int i = n; i > index;)
-			buffer[--i] = --size < index ? 0 : buffer[size];
-	}
-	size = n;
-	ratio = 60. / size;
-	max = ULONG_MAX / size;
-	if (count > max)
-		count = max;
-	compute();
-}
+unsigned long cpm2;
 
 void setup()
 {
 	Serial.begin(speed);
 	pinMode(pin, INPUT_PULLUP);
 	attachInterrupt(interrupt, pulse, FALLING);
-	resize(EEPROM.read(0));
-	timer = millis();
+	timer.every(10000, tik);
+	timer.every(1000, tok);
 }
 
 void loop()
 {
-	unsigned long now = millis();
-
-	if (now - timer >= 1000)
-	{
-		total -= buffer[index];
-		buffer[index] = count;
-		total += buffer[index];
-		count -= buffer[index];
-		if (++index >= size)
-			index = 0;
-		timer = now;
-		compute();
-	}
+	timer.update();
 	Serial.println(cpm);
 	delay(1);
 }
 
-void serialEvent()
+static void pulse()
 {
-	byte n = Serial.parseInt();
+	//while (digitalRead(pin) == LOW); // risque de boucle infinie ?
+	if (count < UINT_MAX / size)
+		count++;
+}
 
-	Serial.readStringUntil('\n');
-	EEPROM.update(0, n);
-	resize(n);
+static void tik()
+{
+	history.push(buffer.average());
+	cpm2 = history.average();
+}
+
+static void tok()
+{
+	buffer.push(const_cast<word &>(count));
+	cpm = (60 * buffer.average() + 15 * cpm2) / 20;
+	count -= buffer.back();
 }
