@@ -1,0 +1,26 @@
+#!/bin/bash
+. config/geiger.conf
+rrdtool graph geiger.png \
+	--end="now" \
+	--start="-1hour" \
+	--title="$title" \
+	--vertical-label="CPM" \
+	--width=720 \
+	--height=240 \
+	--lower-limit=0 \
+	--slope-mode \
+	--imgformat=PNG \
+	--watermark="`date`" \
+	DEF:cpm=$rrdfile:cpm:AVERAGE \
+	CDEF:sievert=cpm,0.0057,* \
+	CDEF:trend=cpm,240,TREND \
+	VDEF:min=cpm,MINIMUM \
+	VDEF:max=cpm,MAXIMUM \
+	VDEF:average=cpm,AVERAGE \
+	COMMENT:"\t\tMin\t\tMax\t\tAverage\n" \
+	LINE1:"cpm#0000ff":"CPM" \
+	GPRINT:min:"\t%.0lf" \
+	GPRINT:max:"\t%.0lf" \
+	GPRINT:average:"\t%.0lf\n" \
+	LINE1:"average#00ff00":"Average\n" \
+	LINE2:"trend#ff00ff":"Trend"

@@ -1,0 +1,22 @@
+#!/bin/bash
+timestamp() {
+	date +%s
+}
+. config/geiger.conf
+if [ ! -f $rrdfile ]
+then
+	rrdtool create $rrdfile --step=1 --no-overwrite DS:cpm:GAUGE:60:0:U \
+		RRA:AVERAGE:0.5:1:604800 RRA:AVERAGE:0.5:5:535680 \
+		RRA:AVERAGE:0.5:60:527040
+fi
+last=$(timestamp)
+stty -F $port $speed sane raw igncr
+while read -r cpm < $port
+do
+	now=$(timestamp)
+	if [ $now != $last ]
+	then
+		rrdtool update $rrdfile $now:$cpm
+		last=$now
+	fi
+done
