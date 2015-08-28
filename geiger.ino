@@ -6,7 +6,7 @@
 /*   By: abouvier <abouvier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/08/04 23:30:42 by abouvier          #+#    #+#             */
-/*   Updated: 2015/08/18 07:14:56 by abouvier         ###   ########.fr       */
+/*   Updated: 2015/08/25 22:01:54 by abouvier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void loop()
 		unsigned long value = count;
 
 		buffer.push(value);
-		Serial.println(buffer.sum());
+		Serial.println(buffer.sum() * (60. / size), 0);
 		count -= value;
 		past = now;
 	}
