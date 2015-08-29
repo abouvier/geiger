@@ -11,16 +11,32 @@ rrdtool graph geiger.png \
 	--slope-mode \
 	--imgformat=PNG \
 	--watermark="`date`" \
+	--border=0 \
+	--color="BACK#FFFFFF" \
+	--color="GRID#666666" \
+	--color="MGRID#333333" \
+	--color="ARROW#000000" \
 	DEF:cpm=$rrdfile:cpm:AVERAGE \
 	CDEF:sievert=cpm,0.0057,* \
 	CDEF:trend=cpm,240,TREND \
+	VDEF:now=cpm,LAST \
 	VDEF:min=cpm,MINIMUM \
+	VDEF:avg=cpm,AVERAGE \
 	VDEF:max=cpm,MAXIMUM \
-	VDEF:average=cpm,AVERAGE \
-	COMMENT:"\t\tMin\t\tMax\t\tAverage\n" \
-	LINE1:"cpm#0000ff":"CPM" \
-	GPRINT:min:"\t%.0lf" \
-	GPRINT:max:"\t%.0lf" \
-	GPRINT:average:"\t%.0lf\n" \
-	LINE1:"average#00ff00":"Average\n" \
-	LINE2:"trend#ff00ff":"Trend"
+	VDEF:tnow=trend,LAST \
+	VDEF:tmin=trend,MINIMUM \
+	VDEF:tavg=trend,AVERAGE \
+	VDEF:tmax=trend,MAXIMUM \
+	LINE2:"cpm#5bc0de":"CPM\t" \
+	AREA:"cpm#5bc0de99" \
+	GPRINT:now:"now\:%3.0lf" \
+	GPRINT:min:"min\:%3.0lf" \
+	GPRINT:avg:"avg\:%3.0lf" \
+	GPRINT:max:"max\:%3.0lf\l" \
+	LINE2:"trend#337AB7":"Trend\t" \
+	GPRINT:tnow:"now\:%3.0lf" \
+	GPRINT:tmin:"min\:%3.0lf" \
+	GPRINT:tavg:"avg\:%3.0lf" \
+	GPRINT:tmax:"max\:%3.0lf\l" \
+	HRULE:"50#F0AD4E" \
+	HRULE:"100#D9534F" \
