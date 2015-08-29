@@ -5,9 +5,9 @@ timestamp() {
 . config/geiger.conf
 if [ ! -f $rrdfile ]
 then
-	rrdtool create $rrdfile --step=1 --no-overwrite DS:cpm:GAUGE:60:0:U \
-		RRA:AVERAGE:0.5:1:604800 RRA:AVERAGE:0.5:5:535680 \
-		RRA:AVERAGE:0.5:60:527040
+	rrdtool create $rrdfile --step=1 --no-overwrite DS:cpm:GAUGE:1m:0:U \
+		RRA:AVERAGE:0.5:1s:1w RRA:AVERAGE:0.5:5s:1M \
+		RRA:AVERAGE:0.5:1m:1y
 fi
 last=$(timestamp)
 stty -F $port $speed sane raw igncr
