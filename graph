@@ -7,7 +7,7 @@ for i in ${duration[@]}; do
 	rrdtool graph cpm-${i}.png \
 		--end="now" \
 		--start="-1$i" \
-		--title="$title" \
+		--title="$title ($i)" \
 		--vertical-label="CPM" \
 		--width=720 \
 		--height=240 \
