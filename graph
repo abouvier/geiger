@@ -11,7 +11,7 @@ for i in ${duration[@]}; do
 		--vertical-label="CPM" \
 		--width=720 \
 		--height=240 \
-		--lower-limit=0 \
+		--alt-y-grid \
 		--slope-mode \
 		--imgformat=PNG \
 		--watermark="`date`" \
@@ -55,6 +55,48 @@ for i in ${duration[@]}; do
 		COMMENT:"\t\t\trem\t" \
 		GPRINT:mrem_h:"%3.2lf mrem/h" \
 		GPRINT:rem_y:"%3.3lf rem/y\l" \
+		HRULE:"50#F0AD4E" \
+		HRULE:"100#D9534F"
+	rrdtool graph sv-${i}.png \
+		--end="now" \
+		--start="-1$i" \
+		--title="$title ($i)" \
+		--vertical-label="Microsievert" \
+		--width=720 \
+		--height=240 \
+		--alt-y-grid \
+		--slope-mode \
+		--imgformat=PNG \
+		--watermark="`date`" \
+		--border=0 \
+		--color="BACK#FFFFFF" \
+		--color="GRID#666666" \
+		--color="MGRID#333333" \
+		--color="ARROW#000000" \
+		DEF:cpm=$rrdfile:cpm:AVERAGE \
+		CDEF:usvh=cpm,0.0057,* \
+		CDEF:usvm=usvh,60,/ \
+		VDEF:now=usvm,LAST \
+		VDEF:min=usvm,MINIMUM \
+		VDEF:avg=usvm,AVERAGE \
+		VDEF:max=usvm,MAXIMUM \
+		CDEF:msvy=usvh,24,366,0.001,*,*,* \
+		CDEF:mremh=usvh,10,* \
+		CDEF:remy=msvy,10,* \
+		VDEF:uSv_h=usvh,AVERAGE \
+		VDEF:mSv_y=msvy,AVERAGE \
+		VDEF:mrem_h=mremh,AVERAGE \
+		VDEF:rem_y=remy,AVERAGE \
+		LINE2:"usvm#5bc0de" \
+		AREA:"usvm#5bc0de99" \
+		GPRINT:now:"now\: %.8lf uSv/m" \
+		GPRINT:min:"min\: %.8lf uSv/m" \
+		GPRINT:avg:"avg\: %.8lf uSv/m" \
+		GPRINT:max:"max\: %.8lf uSv/m\c" \
+		GPRINT:uSv_h:"%3.3lf uSv/h" \
+		GPRINT:mSv_y:"%3.3lf mSv/y" \
+		GPRINT:mrem_h:"%3.3lf mrem/h" \
+		GPRINT:rem_y:"%3.3lf rem/y\c" \
 		HRULE:"50#F0AD4E" \
 		HRULE:"100#D9534F"
 done
