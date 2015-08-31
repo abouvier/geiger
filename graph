@@ -5,7 +5,7 @@ duration=(hour day week month year)
 trend=240
 
 for i in ${duration[@]}; do
-	rrdtool graph cpm-${i}.png \
+	rrdtool graph ${static}/cpm-${i}.png \
 		--end="now" \
 		--start="-1$i" \
 		--title="$title ($i)" \
@@ -58,7 +58,7 @@ for i in ${duration[@]}; do
 		GPRINT:rem_y:"%3.3lf rem/y\l" \
 		HRULE:"50#F0AD4E" \
 		HRULE:"100#D9534F"
-	rrdtool graph sv-${i}.png \
+	rrdtool graph ${static}/sv-${i}.png \
 		--end="now" \
 		--start="-1$i" \
 		--title="$title ($i)" \
