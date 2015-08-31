@@ -88,6 +88,7 @@ for i in ${duration[@]}; do
 		VDEF:mSv_y=msvy,AVERAGE \
 		VDEF:mrem_h=mremh,AVERAGE \
 		VDEF:rem_y=remy,AVERAGE \
+		CDEF:trend=usvm,$trend,TREND \
 		LINE2:"usvm#5bc0de" \
 		AREA:"usvm#5bc0de99" \
 		GPRINT:now:"now\: %.8lf uSv/m" \
@@ -98,6 +99,7 @@ for i in ${duration[@]}; do
 		GPRINT:mSv_y:"%3.3lf mSv/y" \
 		GPRINT:mrem_h:"%3.3lf mrem/h" \
 		GPRINT:rem_y:"%3.3lf rem/y\c" \
+		LINE2:"trend#337AB7":"Trend\t" \
 		HRULE:"50#F0AD4E" \
 		HRULE:"100#D9534F"
 	trend=$((trend * 5))
