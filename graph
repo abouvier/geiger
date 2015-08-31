@@ -2,6 +2,7 @@
 
 . config/geiger.conf
 duration=(hour day week month year)
+trend=240
 
 for i in ${duration[@]}; do
 	rrdtool graph cpm-${i}.png \
@@ -25,7 +26,7 @@ for i in ${duration[@]}; do
 		VDEF:min=cpm,MINIMUM \
 		VDEF:avg=cpm,AVERAGE \
 		VDEF:max=cpm,MAXIMUM \
-		CDEF:trend=cpm,240,TREND \
+		CDEF:trend=cpm,$trend,TREND \
 		VDEF:tnow=trend,LAST \
 		VDEF:tmin=trend,MINIMUM \
 		VDEF:tavg=trend,AVERAGE \
@@ -99,4 +100,5 @@ for i in ${duration[@]}; do
 		GPRINT:rem_y:"%3.3lf rem/y\c" \
 		HRULE:"50#F0AD4E" \
 		HRULE:"100#D9534F"
+	trend=$((trend * 5))
 done
