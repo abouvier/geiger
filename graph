@@ -99,7 +99,7 @@ for i in ${duration[@]}; do
 		GPRINT:tmin:"min\: %2.3lf uSv/h" \
 		GPRINT:tavg:"avg\: %2.3lf uSv/h" \
 		GPRINT:tmax:"max\: %2.3lf uSv/h\l" \
-		HRULE:"50#F0AD4E" \
-		HRULE:"100#D9534F"
+		HRULE:"0.285#F0AD4E" \
+		HRULE:"0.57#D9534F"
 	trend=$((trend * 5))
 done
