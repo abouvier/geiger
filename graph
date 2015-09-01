@@ -1,18 +1,33 @@
 #!/bin/bash
-. config/geiger.conf
-rrdtool graph geiger.png \
-	--end="now" \
-	--start="-1hour" \
+#
+# graph -- rrdtool graph generator
+# Copyright (C) 2015  abouvier <abouvier@student.42.fr>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config/geiger.conf"
+
+rrdtool graph geiger.png --imgformat=PNG \
 	--title="$title" \
+	--start="-1hour" --end="now" \
 	--vertical-label="CPM" \
-	--width=720 \
-	--height=240 \
+	--width=720 --height=240 \
 	--lower-limit=0 \
 	--slope-mode \
-	--imgformat=PNG \
 	--watermark="`date`" \
 	DEF:cpm=$rrdfile:cpm:AVERAGE \
-	CDEF:sievert=cpm,0.0057,* \
+	CDEF:usvh=cpm,$factor,* \
 	CDEF:trend=cpm,240,TREND \
 	VDEF:min=cpm,MINIMUM \
 	VDEF:max=cpm,MAXIMUM \
