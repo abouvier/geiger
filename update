@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# geiger - rrdtool update daemon
+# update -- geiger update daemon
 # Copyright (C) 2015  abouvier <abouvier@student.42.fr>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-timestamp() {
-	date +%s
+timestamp () {
+	date "$@" +%s
 }
 
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config/geiger.conf"
 
-if [ ! -e "$rrdfile" ]
+if [[ ! -e "$rrdfile" ]]
 then
-	rrdtool create "$rrdfile" --step=1 --no-overwrite DS:cpm:GAUGE:60:0:U \
-		RRA:AVERAGE:0.5:1:604800 RRA:AVERAGE:0.5:5:535680 \
-		RRA:AVERAGE:0.5:60:527040
+	rrdtool create "$rrdfile" --no-overwrite --step=1 DS:cpm:GAUGE:1m:0:U \
+		RRA:AVERAGE:0.5:1s:1w \
+		RRA:AVERAGE:0.5:5s:1M \
+		RRA:AVERAGE:0.5:1m:1y
 fi
-last=$(timestamp)
-stty -F "$port" $speed sane raw igncr
-while read -r cpm < "$port" # faire un pre-read !
+last=$(timestamp --date=tomorrow)
+stty -F "$port" "$speed" sane raw igncr
+while read -r cpm
 do
 	now=$(timestamp)
-	if [ $now != $last ]
+	if (( "$now" > "$last" ))
 	then
-		rrdtool update "$rrdfile" $now:$cpm
-		last=$now
+		rrdtool update "$rrdfile" "$now:$cpm"
 	fi
-done
+	last="$now"
+done < "$port"

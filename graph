@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# graph -- rrdtool graph generator
+# graph -- geiger graph generator
 # Copyright (C) 2015  abouvier <abouvier@student.42.fr>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,23 +19,53 @@
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config/geiger.conf"
 
 rrdtool graph geiger.png --imgformat=PNG \
-	--title="$title" \
-	--start="-1hour" --end="now" \
-	--vertical-label="CPM" \
-	--width=720 --height=240 \
+	--title="Geiger counter with $tube tube" \
+	--start="-1hour" \
+	--end="now" \
+	--font="DEFAULT:0:monaco" \
+	--vertical-label="µSv/h" \
+	--width=720 \
+	--height=240 \
 	--lower-limit=0 \
+	--units-exponent=0 \
+	--left-axis-format="%.2lf" \
 	--slope-mode \
-	--watermark="`date`" \
-	DEF:cpm=$rrdfile:cpm:AVERAGE \
-	CDEF:usvh=cpm,$factor,* \
-	CDEF:trend=cpm,240,TREND \
-	VDEF:min=cpm,MINIMUM \
-	VDEF:max=cpm,MAXIMUM \
-	VDEF:average=cpm,AVERAGE \
-	COMMENT:"\t\tMin\t\tMax\t\tAverage\n" \
-	LINE1:"cpm#0000ff":"CPM" \
-	GPRINT:min:"\t%.0lf" \
-	GPRINT:max:"\t%.0lf" \
-	GPRINT:average:"\t%.0lf\n" \
-	LINE1:"average#00ff00":"Average\n" \
-	LINE2:"trend#ff00ff":"Trend"
+	--watermark="$(date --rfc-2822)" \
+	--border=0 \
+	--color="BACK#924d8b" \
+	--color="CANVAS#924d8b" \
+	--color="FONT#ffffff" \
+	--color="GRID#aea79f" \
+	--color="MGRID#beb8b2" \
+	--color="AXIS#beb8b2" \
+	--color="ARROW#beb8b2" \
+	--color="FRAME#333333" \
+	DEF:cpm="$rrdfile":cpm:AVERAGE \
+	CDEF:unit=cpm,"$factor",* \
+	CDEF:trend=unit,240,TREND \
+	VDEF:min=unit,MINIMUM \
+	VDEF:avg=unit,AVERAGE \
+	VDEF:max=unit,MAXIMUM \
+	VDEF:last=unit,LAST \
+	VDEF:tmin=trend,MINIMUM \
+	VDEF:tavg=trend,AVERAGE \
+	VDEF:tmax=trend,MAXIMUM \
+	VDEF:tlast=trend,LAST \
+	COMMENT:"\t\t" \
+	COMMENT:"Min\t" \
+	COMMENT:"Avg\t" \
+	COMMENT:"Max\t" \
+	COMMENT:"Last\l" \
+	AREA:"unit#19b6eeaa" \
+	LINE2:"unit#19b6ee":" μSv/h\t\t" \
+	GPRINT:min:"%.3lf\t" \
+	GPRINT:avg:"%.3lf\t" \
+	GPRINT:max:"%.3lf\t" \
+	GPRINT:last:"%.3lf\l" \
+	LINE2:"trend#3fb24f":" Trend μSv/h\t" \
+	GPRINT:tmin:"%.3lf\t" \
+	GPRINT:tavg:"%.3lf\t" \
+	GPRINT:tmax:"%.3lf\t" \
+	GPRINT:tlast:"%.3lf\l" \
+	LINE1:"avg#fc4949":" Average" \
+	HRULE:"$(bc <<< "$alert*$factor")#dd4814: Alert\l"
