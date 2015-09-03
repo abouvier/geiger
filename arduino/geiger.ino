@@ -1,5 +1,5 @@
 /*
-	geiger.ino -- geiger counter for Arduino
+	geiger.ino -- Geiger counter for Arduino
 	Copyright (C) 2015  abouvier <abouvier@student.42.fr>
 
 	This program is free software: you can redistribute it and/or modify

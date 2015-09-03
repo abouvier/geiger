@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# graph -- geiger graph generator
+# graph -- Geiger graph generator
 # Copyright (C) 2015  abouvier <abouvier@student.42.fr>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,53 +19,56 @@
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config/geiger.conf"
 
 rrdtool graph geiger.png --imgformat=PNG \
-	--title="Geiger counter with $tube tube" \
+	--title="Geiger counter ($tube)" \
 	--start="-1hour" \
 	--end="now" \
-	--font="DEFAULT:0:monaco" \
-	--vertical-label="µSv/h" \
+	--vertical-label="CPM" \
+	--right-axis-label="μSv/h" \
+	--right-axis="$factor:0" \
+	--right-axis-format="%.2lf" \
+	--alt-y-grid \
+	--units-length=4 \
 	--width=720 \
 	--height=240 \
 	--lower-limit=0 \
-	--units-exponent=0 \
-	--left-axis-format="%.2lf" \
 	--slope-mode \
-	--watermark="$(date --rfc-2822)" \
 	--border=0 \
+	--pango-markup \
+	--watermark="$(date --rfc-2822)" \
 	--color="BACK#924d8b" \
 	--color="CANVAS#924d8b" \
-	--color="FONT#ffffff" \
 	--color="GRID#aea79f" \
 	--color="MGRID#beb8b2" \
+	--color="FONT#ffffff" \
 	--color="AXIS#beb8b2" \
-	--color="ARROW#beb8b2" \
 	--color="FRAME#333333" \
+	--color="ARROW#beb8b2" \
 	DEF:cpm="$rrdfile":cpm:AVERAGE \
-	CDEF:unit=cpm,"$factor",* \
-	CDEF:trend=unit,240,TREND \
-	VDEF:min=unit,MINIMUM \
-	VDEF:avg=unit,AVERAGE \
-	VDEF:max=unit,MAXIMUM \
-	VDEF:last=unit,LAST \
+	VDEF:min=cpm,MINIMUM \
+	VDEF:avg=cpm,AVERAGE \
+	VDEF:max=cpm,MAXIMUM \
+	VDEF:last=cpm,LAST \
+	CDEF:trend=cpm,240,TRENDNAN \
 	VDEF:tmin=trend,MINIMUM \
 	VDEF:tavg=trend,AVERAGE \
 	VDEF:tmax=trend,MAXIMUM \
 	VDEF:tlast=trend,LAST \
-	COMMENT:"\t\t" \
+	COMMENT:"\t" \
 	COMMENT:"Min\t" \
-	COMMENT:"Avg\t" \
+	COMMENT:"Average\t" \
 	COMMENT:"Max\t" \
 	COMMENT:"Last\l" \
-	AREA:"unit#19b6eeaa" \
-	LINE2:"unit#19b6ee":" μSv/h\t\t" \
-	GPRINT:min:"%.3lf\t" \
-	GPRINT:avg:"%.3lf\t" \
-	GPRINT:max:"%.3lf\t" \
-	GPRINT:last:"%.3lf\l" \
-	LINE2:"trend#3fb24f":" Trend μSv/h\t" \
-	GPRINT:tmin:"%.3lf\t" \
-	GPRINT:tavg:"%.3lf\t" \
-	GPRINT:tmax:"%.3lf\t" \
-	GPRINT:tlast:"%.3lf\l" \
-	LINE1:"avg#fc4949":" Average" \
-	HRULE:"$(bc <<< "$alert*$factor")#dd4814: Alert\l"
+	AREA:"cpm#19b6eeaa#19b6ee44:gradheight=-75" \
+	LINE2:"cpm#19b6ee:CPM\t" \
+	GPRINT:min:"%.0lf\t" \
+	GPRINT:avg:"%.0lf\t" \
+	GPRINT:max:"%.0lf\t" \
+	GPRINT:last:"%.0lf\l" \
+	LINE2:"trend#e36c43:CPM\t" \
+	GPRINT:tmin:"%.0lf\t" \
+	GPRINT:tavg:"%.0lf\t" \
+	GPRINT:tmax:"%.0lf\t" \
+	GPRINT:tlast:"%.0lf\l" \
+	COMMENT:"\u" \
+	LINE:"avg#3fb24f:Average" \
+	HRULE:"$alert#dd4814:Alert\r"
