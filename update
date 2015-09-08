@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# update -- Geiger update daemon
+# update - Geiger update daemon
 # Copyright (C) 2015  abouvier <abouvier@student.42.fr>
 #
 # This program is free software: you can redistribute it and/or modify

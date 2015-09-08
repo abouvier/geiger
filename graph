@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# graph -- Geiger graph generator
+# graph - Geiger graph generator
 # Copyright (C) 2015  abouvier <abouvier@student.42.fr>
 #
 # This program is free software: you can redistribute it and/or modify
