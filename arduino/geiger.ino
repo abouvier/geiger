@@ -52,7 +52,7 @@ void loop()
 		unsigned long value = count;
 
 		buffer.push(value);
-		Serial.println(buffer.sum() * (60. / size), 0); // possible overflow !
+		Serial.println(buffer.sum() * (60. / buffer.size()), 0);
 		count -= value;
 		past = now;
 	}
