@@ -13,5 +13,6 @@
 
 ## Software
 
+* [arduino-mk](https://github.com/sudar/Arduino-Makefile) >= 1.5
 * [RRDtool](http://oss.oetiker.ch/rrdtool/) >= 1.4.9
 * [Bash](https://www.gnu.org/software/bash/)
