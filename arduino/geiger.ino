@@ -19,16 +19,14 @@
 #include <MovingAverage.h>
 #include <limits.h>
 
-const int size = 60;
-
-volatile unsigned long count;
-MovingAverage<volatile unsigned long, size> buffer;
-unsigned long past;
+volatile unsigned long cps;
+MovingAverage<volatile unsigned long, 60> cpm;
+unsigned long timer;
 
 static void pulse()
 {
-	if (count < ULONG_MAX / size)
-		count++;
+	if (cps < ULONG_MAX / 60)
+		cps++;
 }
 
 void setup()
@@ -36,19 +34,16 @@ void setup()
 	Serial.begin(9600);
 	pinMode(2, INPUT_PULLUP);
 	attachInterrupt(0, pulse, FALLING);
-	past = millis();
+	timer = millis();
 }
 
 void loop()
 {
-	unsigned long now;
-
-	now = millis();
-	if (now - past >= 1000)
+	if (millis() - timer >= 1000)
 	{
-		buffer.push(count);
-		Serial.println(buffer.sum());
-		count -= buffer.back();
-		past = now;
+		cpm.push(cps);
+		Serial.println(cpm.sum() * (60 / cpm.size()));
+		cps -= cpm.back();
+		timer += 1000;
 	}
 }
