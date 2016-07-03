@@ -1,5 +1,5 @@
 // geiger.ino - Geiger counter for Arduino
-// Copyright (C) 2015-2016  abouvier <abouvier@student.42.fr>
+// Copyright (C) 2015-2016  Alexandre Bouvier <abouvier@student.42.fr>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,36 +14,46 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "geiger.h"
 #include <Arduino.h>
 #include <CircularBuffer.h>
 #include <MovingAverage.h>
+#include <TinyTimer.h>
 #include <limits.h>
 
 volatile unsigned long cps;
-MovingAverage<volatile unsigned long, 60> cpm;
-unsigned long timer;
+MovingAverage<volatile unsigned long, CYCLE_SIZE> cpm;
+TinyTimer<millis> timers[2];
 
-static void pulse()
+static void count()
 {
 	if (cps < ULONG_MAX / 60)
 		cps++;
 }
 
+static void buffer()
+{
+	noInterrupts();
+	cpm.push(cps);
+	cps = 0;
+	interrupts();
+}
+
+static void print()
+{
+	Serial.println(cpm.sum() * (60 / cpm.capacity()));
+}
+
 void setup()
 {
-	Serial.begin(9600);
-	pinMode(2, INPUT_PULLUP);
-	attachInterrupt(0, pulse, FALLING);
-	timer = millis();
+	Serial.begin(SERIAL_SPEED);
+	pinMode(GEIGER_PIN, INPUT_PULLUP);
+	attachInterrupt(GEIGER_INTERRUPT, count, FALLING);
+	timers[1].init(print, PRINT_DELAY);
+	timers[0].init(buffer, 1000);
 }
 
 void loop()
 {
-	if (millis() - timer >= 1000)
-	{
-		cpm.push(cps);
-		Serial.println(cpm.sum() * (60 / cpm.size()));
-		cps -= cpm.back();
-		timer += 1000;
-	}
+	TinyTimer<millis>::update(timers);
 }

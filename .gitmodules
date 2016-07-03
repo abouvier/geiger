@@ -1,0 +1,9 @@
+[submodule "arduino/libraries/CircularBuffer"]
+	path = arduino/libraries/CircularBuffer
+	url = https://github.com/abouvier/CircularBuffer.git
+[submodule "arduino/libraries/MovingAverage"]
+	path = arduino/libraries/MovingAverage
+	url = https://github.com/abouvier/MovingAverage.git
+[submodule "arduino/libraries/TinyTimer"]
+	path = arduino/libraries/TinyTimer
+	url = https://github.com/abouvier/TinyTimer.git
